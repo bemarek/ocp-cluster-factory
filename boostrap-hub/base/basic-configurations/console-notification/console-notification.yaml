@@ -1,0 +1,10 @@
+---
+apiVersion: console.openshift.io/v1
+kind: ConsoleNotification
+metadata:
+  name: environment-banner 
+spec:
+  color: "#FFFFFF"
+  backgroundColor: "#808080"
+  location: BannerTop
+  text: "SET CLUSTER NAME"
