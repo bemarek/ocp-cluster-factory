@@ -89,9 +89,12 @@ spec:
   generators:
   - clusters:
       selector:
-        matchLabels:
-          # Target only the local cluster labeled with 'environment: hub'
-          environment: hub
+        # Use matchExpressions to target multiple clusters by labels
+        matchExpressions:
+          - key: environment
+            operator: In
+            values:
+              - hub
   template:
     metadata:
       name: 'cfg-{{.name}}'
@@ -113,5 +116,9 @@ spec:
         syncOptions:
         - CreateNamespace=true
 EOF
+
+echo "=== Step 6: Enabling GitOps console plugin ==="
+# Patch the cluster Console operator to enable the gitops-plugin
+oc patch console.operator cluster --type=merge -p '{"spec":{"plugins":["gitops-plugin"]}}'
 
 echo "=== Hub Bootstrap process completed successfully! ==="
