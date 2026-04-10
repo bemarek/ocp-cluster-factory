@@ -1,0 +1,17 @@
+# components/argocd-instance/base/argocd-patch.yaml
+apiVersion: argoproj.io/v1beta1
+kind: ArgoCD
+metadata:
+  name: openshift-gitops
+  namespace: openshift-gitops
+spec:
+  applicationSet:
+    enabled: true
+  kustomizeBuildOptions: "--enable-helm"
+  grafana:
+    enabled: false
+  resourceExclusions: |
+    - apiGroups:
+      - events.k8s.io
+      kinds:
+      - Event
