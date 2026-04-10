@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: in-cluster-apps
+  namespace: openshift-gitops
+spec:
+  # Enable the advanced Go template engine to use arrays and indexes
+  goTemplate: true
+  generators:
+  - git:
+      repoURL: 'https://github.com/bemarek/ocp-cluster-factory.git'
+      revision: HEAD
+      # Look for any kustomization.yaml file inside overlays/in-cluster/
+      files:
+      - path: 'overlays/in-cluster/**/kustomization.yaml'
+  template:
+    metadata:
+      # Create a unique name maintaining the structure:
+      # Segment 2 is "basic-configurations", and basename is "console-notification"
+      name: 'in-cluster-{{ index .path.segments 2 }}-{{ .path.basename }}'
+      namespace: openshift-gitops
+    spec:
+      project: default
+      source:
+        repoURL: 'https://github.com/bemarek/ocp-cluster-factory.git'
+        # The .path.path variable points to the directory where the file was found
+        path: '{{ .path.path }}'
+        targetRevision: HEAD
+      destination:
+        server: 'https://kubernetes.default.svc'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+
+
+          
