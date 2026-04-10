@@ -1,0 +1,26 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cluster-factory-root
+  namespace: openshift-gitops
+  # A special finalizer to protect against cascading deletion.
+  # If you accidentally delete this Root App, it won't delete all managed resources!
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/bemarek/ocp-cluster-factory.git'
+    # Pointing exactly to the directory where your ApplicationSets reside
+    path: bootstrap/appsets
+    targetRevision: HEAD
+  destination:
+    # The Root App installs itself on the local Hub cluster...
+    server: 'https://kubernetes.default.svc'
+    # ...and deploys the ApplicationSet objects into the ArgoCD namespace
+    namespace: openshift-gitops
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
