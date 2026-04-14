@@ -13,23 +13,15 @@ spec:
           - path: 'overlays/in-cluster/**/kustomization.yaml'
   template:
     metadata:
-      # NAME: Truly dynamic naming
-      # 1. Take the directory path (excluding kustomization.yaml)
-      # 2. Strip any "XX-" numeric prefixes from ALL path segments
-      # 3. Flatten the directory structure by replacing "/" with "-"
-      # 4. Remove the redundant "overlays-in-cluster-" prefix if present
-      name: >-
-        {{- $path := .path.path | dir -}}
-        {{- $clean := $path | regexReplaceAll "(^|/)[0-9]+-" "$1" | replace "/" "-" -}}
-        {{- $clean | trimPrefix "overlays-in-cluster-" | printf "in-cluster-%s" -}}
+      # NAME: Your original dynamic segment logic.
+      # No hardcoded directory names! It skips the first 2 segments and the last one.
+      name: '{{- $seg := .path.segments -}}{{- $len := len $seg -}}in-cluster{{- range $i, $s := $seg -}}{{- if and (gt $i 1) (lt $i (sub $len 1)) -}}-{{- $s | regexReplaceAll "^[0-9]+-" "" -}}{{- end -}}{{- end -}}'
       
       annotations:
         factory.managed-by: ocp-cluster-factory
-        
-        # KEY: Sync Wave logic - depends on the immediate parent folder name
+        # KEY: Annotation logic with independent scope for $l
         ? '{{- $l := index .path.segments (sub (len .path.segments) 2) -}}{{- (regexMatch "^[0-9]+-" $l) | ternary "argocd.argoproj.io/sync-wave" "factory.internal/ignore" -}}'
-        
-        # VALUE: Extract the wave number (independent scope for value)
+        # VALUE: Extract digits with independent scope for $l
         : '{{- $l := index .path.segments (sub (len .path.segments) 2) -}}{{- $l | regexFind "^[0-9]+" | default "none" -}}'
         
     spec:
