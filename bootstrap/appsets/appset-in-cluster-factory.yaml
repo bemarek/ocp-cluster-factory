@@ -4,34 +4,32 @@ metadata:
   name: in-cluster-factory
   namespace: openshift-gitops
 spec:
-  # Enable Go Template engine for advanced path processing
   goTemplate: true
   generators:
     - git:
         repoURL: https://github.com/bemarek/ocp-cluster-factory.git
         revision: HEAD
-        # Discover all kustomization.yaml files recursively
         files:
           - path: 'overlays/in-cluster/**/kustomization.yaml'
   template:
     metadata:
-      # Robust naming: Iterates through path segments and joins them with dashes
+      # NAME: We use regexReplaceAll to strip the "10-" prefix if it exists.
+      # If it doesn't exist, it leaves the string untouched. Safe and clean.
       name: >-
         {{- $seg := .path.segments -}}
         {{- $len := len $seg -}}
         in-cluster
         {{- range $i, $s := $seg -}}
           {{- if and (gt $i 1) (lt $i (sub $len 1)) -}}
-            -{{- (regexMatch "^[0-9]+-" $s) | ternary (index (split "-" $s) 1) $s -}}
+            -{{- $s | regexReplaceAll "^[0-9]+-" "" -}}
           {{- end -}}
         {{- end -}}
       
       annotations:
-        # Static anchor to keep the mapping valid and provide metadata
         factory.managed-by: "ocp-cluster-factory"
-        # Stealth one-liner: VS Code sees a quoted string (valid key), ArgoCD sees logic.
-        # If no wave is found, it creates a dummy annotation that ArgoCD ignores.
-        "{{- $l := index .path.segments (sub (len .path.segments) 2) -}}{{- regexMatch \"^[0-9]+-\" $l | ternary \"argocd.argoproj.io/sync-wave\" \"factory.internal/ignore\" -}}": "{{- regexMatch \"^[0-9]+-\" $l | ternary (index (split \"-\" $l) 0) \"true\" -}}"
+        # ANNOTATIONS: We use regexFind to extract the number. 
+        # If no number, we use our "ignore" label trick for VSCode peace of mind.
+        "{{- $l := index .path.segments (sub (len .path.segments) 2) -}}{{- (regexMatch \"^[0-9]+-\" $l) | ternary \"argocd.argoproj.io/sync-wave\" \"factory.internal/ignore\" -}}": "{{- $l | regexFind \"^[0-9]+\" | default \"none\" -}}"
     spec:
       project: default
       source:
