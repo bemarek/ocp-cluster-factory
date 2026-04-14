@@ -13,8 +13,7 @@ spec:
           - path: 'overlays/in-cluster/**/kustomization.yaml'
   template:
     metadata:
-      # NAME: We use regexReplaceAll to strip the "10-" prefix if it exists.
-      # If it doesn't exist, it leaves the string untouched. Safe and clean.
+      # Generates the application name by stripping numeric prefixes from folders (e.g., 10-storage -> storage)
       name: >-
         {{- $seg := .path.segments -}}
         {{- $len := len $seg -}}
@@ -26,10 +25,15 @@ spec:
         {{- end -}}
       
       annotations:
-        factory.managed-by: "ocp-cluster-factory"
-        # ANNOTATIONS: We use regexFind to extract the number. 
-        # If no number, we use our "ignore" label trick for VSCode peace of mind.
-        "{{- $l := index .path.segments (sub (len .path.segments) 2) -}}{{- (regexMatch \"^[0-9]+-\" $l) | ternary \"argocd.argoproj.io/sync-wave\" \"factory.internal/ignore\" -}}": "{{- $l | regexFind \"^[0-9]+\" | default \"none\" -}}"
+        factory.managed-by: ocp-cluster-factory
+        
+        # KEY: Detects if the folder has a numeric prefix.
+        # If yes -> sync-wave; if no -> ignore label.
+        ? '{{- $l := index .path.segments (sub (len .path.segments) 2) -}}{{- (regexMatch "^[0-9]+-" $l) | ternary "argocd.argoproj.io/sync-wave" "factory.internal/ignore" -}}'
+        
+        # VALUE: Extracts only the digits from the folder name.
+        : '{{- $l := index .path.segments (sub (len .path.segments) 2) -}}{{- $l | regexFind "^[0-9]+" | default "none" -}}'
+        
     spec:
       project: default
       source:
