@@ -13,25 +13,15 @@ spec:
           - path: 'overlays/in-cluster/**/kustomization.yaml'
   template:
     metadata:
-      # Generates the application name by stripping numeric prefixes from folders (e.g., 10-storage -> storage)
-      name: >-
-        {{- $seg := .path.segments -}}
-        {{- $len := len $seg -}}
-        in-cluster
-        {{- range $i, $s := $seg -}}
-          {{- if and (gt $i 1) (lt $i (sub $len 1)) -}}
-            -{{- $s | regexReplaceAll "^[0-9]+-" "" -}}
-          {{- end -}}
-        {{- end -}}
+      # NAME: Dynamically join path segments between root and file
+      # Example: overlays/in-cluster/10-core/110-argo/kustomization.yaml -> in-cluster-core-argo
+      name: '{{- $rel := slice .path.segments 2 (sub (len .path.segments) 1) -}}in-cluster{{- range $rel -}}-{{- . | regexReplaceAll "^[0-9]+-" "" -}}{{- end -}}'
       
       annotations:
         factory.managed-by: ocp-cluster-factory
-        
-        # KEY: Detects if the folder has a numeric prefix.
-        # If yes -> sync-wave; if no -> ignore label.
+        # KEY: Annotation key for Sync Wave (must redefine $l for scope)
         ? '{{- $l := index .path.segments (sub (len .path.segments) 2) -}}{{- (regexMatch "^[0-9]+-" $l) | ternary "argocd.argoproj.io/sync-wave" "factory.internal/ignore" -}}'
-        
-        # VALUE: Extracts only the digits from the folder name.
+        # VALUE: Annotation value extracting the wave number (must redefine $l for scope)
         : '{{- $l := index .path.segments (sub (len .path.segments) 2) -}}{{- $l | regexFind "^[0-9]+" | default "none" -}}'
         
     spec:
