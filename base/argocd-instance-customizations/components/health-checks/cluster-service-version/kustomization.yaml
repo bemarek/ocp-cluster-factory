@@ -1,0 +1,30 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+patches:
+  - target:
+      kind: ArgoCD
+      name: openshift-gitops
+      namespace: openshift-gitops
+    patch: |
+      - op: add
+        path: /spec/resourceHealthChecks/-
+        value:
+          group: operators.coreos.com
+          kind: ClusterServiceVersion
+          check: |
+            local hs = {}
+            if obj.status ~= nil and obj.status.phase ~= nil then
+              if obj.status.phase == "Succeeded" then
+                hs.status = "Healthy"
+                hs.message = "Operator is installed and CSV is Succeeded"
+                return hs
+              elseif obj.status.phase == "Failed" then
+                hs.status = "Degraded"
+                hs.message = "Operator installation failed: " .. (obj.status.reason or "Unknown Error")
+                return hs
+              end
+            end
+            hs.status = "Progressing"
+            hs.message = "Waiting for CSV to reach Succeeded phase (current: " .. (obj.status and obj.status.phase or "Unknown") .. ")"
+            return hs

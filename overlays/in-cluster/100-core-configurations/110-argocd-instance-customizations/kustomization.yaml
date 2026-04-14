@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../../../base/argocd-instance-customizations/instance
+
+components:
+  - ../../../../base/argocd-instance-customizations/components/basic-tuning 
+  - ../../../../base/argocd-instance-customizations/components/health-checks/subscription
+  - ../../../../base/argocd-instance-customizations/components/health-checks/cluster-service-version
+  - ../../../../base/argocd-instance-customizations/components/health-checks/local-volume-set
+  - ../../../../base/argocd-instance-customizations/components/health-checks/storagecluster

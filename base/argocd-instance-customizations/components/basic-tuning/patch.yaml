@@ -1,4 +1,3 @@
-# components/argocd-instance/base/argocd-patch.yaml
 apiVersion: argoproj.io/v1beta1
 kind: ArgoCD
 metadata:

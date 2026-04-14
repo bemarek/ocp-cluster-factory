@@ -1,0 +1,31 @@
+# ../../../../base/argocd-instance-customizations/components/health-checks/subscription/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+patches:
+  - target:
+      kind: ArgoCD
+      name: openshift-gitops
+      namespace: openshift-gitops
+    patch: |
+      - op: add
+        path: /spec/resourceHealthChecks/-
+        value:
+          group: operators.coreos.com
+          kind: Subscription
+          check: |
+            local hs = {}
+            if obj.status ~= nil and obj.status.state ~= nil then
+              if obj.status.state == "AtLatestKnown" then
+                hs.status = "Healthy"
+                hs.message = "Subscription is up to date"
+                return hs
+              elseif obj.status.state == "UpgradeFailed" then
+                hs.status = "Degraded"
+                hs.message = "Operator subscription failed to upgrade"
+                return hs
+              end
+            end
+            hs.status = "Progressing"
+            hs.message = "Waiting for OLM (current state: " .. (obj.status and obj.status.state or "Unknown") .. ")"
+            return hs

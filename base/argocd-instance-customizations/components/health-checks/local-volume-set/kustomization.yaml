@@ -1,0 +1,43 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+patches:
+  - target:
+      kind: ArgoCD
+      name: openshift-gitops
+      namespace: openshift-gitops
+    patch: |
+      - op: add
+        path: /spec/resourceHealthChecks/-
+        value:
+          group: local.storage.openshift.io
+          kind: LocalVolumeSet
+          check: |
+            local res = {}
+            if obj.status ~= nil and obj.status.conditions ~= nil then
+              local is_degraded = false
+              local is_progressing = false
+              local is_available = false
+              for _, condition in pairs(obj.status.conditions) do
+                if condition.type == "Degraded" and condition.status == "True" then
+                  is_degraded = true
+                  res.degraded_msg = condition.message
+                elseif condition.type == "Progressing" and condition.status == "True" then
+                  is_progressing = true
+                  res.progressing_msg = condition.message
+                elseif condition.type == "Available" and condition.status == "True" then
+                  is_available = true
+                  res.available_msg = condition.message
+                end
+              end
+              if is_degraded then
+                return { status = "Degraded", message = res.degraded_msg or "LocalVolumeSet has failed" }
+              end
+              if is_progressing then
+                return { status = "Progressing", message = res.progressing_msg or "Provisioning local volumes..." }
+              end
+              if is_available then
+                return { status = "Healthy", message = res.available_msg or "Local volumes are provisioned and available" }
+              end
+            end
+            return { status = "Progressing", message = "Waiting for Local Storage Operator to process the resource..." }
