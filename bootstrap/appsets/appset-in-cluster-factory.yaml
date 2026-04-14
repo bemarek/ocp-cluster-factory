@@ -13,22 +13,29 @@ spec:
           - path: 'overlays/in-cluster/**/kustomization.yaml'
   template:
     metadata:
-      # NAME: Your original dynamic segment logic.
-      # No hardcoded directory names! It skips the first 2 segments and the last one.
-      name: '{{- $seg := .path.segments -}}{{- $len := len $seg -}}in-cluster{{- range $i, $s := $seg -}}{{- if and (gt $i 1) (lt $i (sub $len 1)) -}}-{{- $s | regexReplaceAll "^[0-9]+-" "" -}}{{- end -}}{{- end -}}'
+      # NAME: Dynamic naming skipping the first root segment
+      # 1. 'slice .path.segments 1' removes the first element (e.g., 'overlays')
+      # 2. 'join "-"' creates a flat name from the remaining path segments
+      # This ensures uniqueness without hardcoding directory names.
+      name: '{{ slice .path.segments 1 | join "-" }}'
       
       annotations:
         factory.managed-by: ocp-cluster-factory
-        # KEY: Annotation logic with independent scope for $l
-        ? '{{- $l := index .path.segments (sub (len .path.segments) 2) -}}{{- (regexMatch "^[0-9]+-" $l) | ternary "argocd.argoproj.io/sync-wave" "factory.internal/ignore" -}}'
-        # VALUE: Extract digits with independent scope for $l
-        : '{{- $l := index .path.segments (sub (len .path.segments) 2) -}}{{- $l | regexFind "^[0-9]+" | default "none" -}}'
+        
+        # KEY: Sync Wave logic - checks the current directory (last segment)
+        # Defining $l locally for the key scope.
+        ? '{{- $l := index .path.segments (sub (len .path.segments) 1) -}}{{- (regexMatch "^[0-9]+-" $l) | ternary "argocd.argoproj.io/sync-wave" "factory.internal/ignore" -}}'
+        
+        # VALUE: Extracts the wave number from the current directory
+        # Defining $l locally for the value scope.
+        : '{{- $l := index .path.segments (sub (len .path.segments) 1) -}}{{- $l | regexFind "^[0-9]+" | default "none" -}}'
         
     spec:
       project: default
       source:
         repoURL: https://github.com/bemarek/ocp-cluster-factory.git
         targetRevision: HEAD
+        # The path points to the directory containing kustomization.yaml
         path: '{{ .path.path }}'
       destination:
         server: https://kubernetes.default.svc
