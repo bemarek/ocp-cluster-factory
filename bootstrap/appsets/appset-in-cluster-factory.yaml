@@ -13,15 +13,23 @@ spec:
           - path: 'overlays/in-cluster/**/kustomization.yaml'
   template:
     metadata:
-      # NAME: Dynamically join path segments between root and file
-      # Example: overlays/in-cluster/10-core/110-argo/kustomization.yaml -> in-cluster-core-argo
-      name: '{{- $rel := slice .path.segments 2 (sub (len .path.segments) 1) -}}in-cluster{{- range $rel -}}-{{- . | regexReplaceAll "^[0-9]+-" "" -}}{{- end -}}'
+      # NAME: Truly dynamic naming
+      # 1. Take the directory path (excluding kustomization.yaml)
+      # 2. Strip any "XX-" numeric prefixes from ALL path segments
+      # 3. Flatten the directory structure by replacing "/" with "-"
+      # 4. Remove the redundant "overlays-in-cluster-" prefix if present
+      name: >-
+        {{- $path := .path.path | dir -}}
+        {{- $clean := $path | regexReplaceAll "(^|/)[0-9]+-" "$1" | replace "/" "-" -}}
+        {{- $clean | trimPrefix "overlays-in-cluster-" | printf "in-cluster-%s" -}}
       
       annotations:
         factory.managed-by: ocp-cluster-factory
-        # KEY: Annotation key for Sync Wave (must redefine $l for scope)
+        
+        # KEY: Sync Wave logic - depends on the immediate parent folder name
         ? '{{- $l := index .path.segments (sub (len .path.segments) 2) -}}{{- (regexMatch "^[0-9]+-" $l) | ternary "argocd.argoproj.io/sync-wave" "factory.internal/ignore" -}}'
-        # VALUE: Annotation value extracting the wave number (must redefine $l for scope)
+        
+        # VALUE: Extract the wave number (independent scope for value)
         : '{{- $l := index .path.segments (sub (len .path.segments) 2) -}}{{- $l | regexFind "^[0-9]+" | default "none" -}}'
         
     spec:
