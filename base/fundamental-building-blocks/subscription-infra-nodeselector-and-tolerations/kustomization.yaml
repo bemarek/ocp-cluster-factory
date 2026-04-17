@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+patches:
+  - target:
+      kind: Subscription
+      # Use regex wildcard to explicitly match all Subscriptions
+      name: ".*"
+    patch: |-
+      apiVersion: operators.coreos.com/v1alpha1
+      kind: Subscription
+      metadata:
+        # A placeholder is still required here by the Strategic Merge Patch parser,
+        # but the 'target' block ensures it applies to all matched names.
+        name: placeholder-name
+      spec:
+        config:
+          nodeSelector:
+            node-role.kubernetes.io/infra: ""
+          tolerations:
+            - effect: NoSchedule
+              key: node-role.kubernetes.io/infra
+              operator: Exists
