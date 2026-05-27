@@ -5,7 +5,7 @@ resources:
   - ../../../../base/argocd-instance-customizations/instance
 
 components:
-  - ../../../../base/argocd-instance-customizations/components/basic-tuning 
+  - ../../../../base/argocd-instance-customizations/components/essential-tunings
   - ../../../../base/argocd-instance-customizations/components/health-checks/subscription
   - ../../../../base/argocd-instance-customizations/components/health-checks/cluster-service-version
   - ../../../../base/argocd-instance-customizations/components/health-checks/local-volume-set
