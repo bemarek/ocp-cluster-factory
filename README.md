@@ -1,5 +1,5 @@
 # Setup
-Instalation of Openshift GitOPS operator
+Installation of Openshift GitOPS operator
 
 ```
 $ oc apply -k setup/operator-gitops
