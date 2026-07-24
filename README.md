@@ -9,7 +9,7 @@ $ oc apply -k setup/operator-gitops
 Initialization of Cluster Factory ArgoCD Application (cluster-factory-root), which points to ./boostrap/appsets/ where each cluster should have its dedicated ApplicationSet pointing in turn to appropriate overlay directory.
 
 ```
-oc apply -d init/
+oc apply -k init/
 ```
 
 
