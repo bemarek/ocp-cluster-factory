@@ -24,11 +24,13 @@ spec:
         
         # KEY: Sync Wave logic - checks the current directory (last segment)
         # Defining $l locally for the key scope.
-        ? '{{- $l := index .path.segments (sub (len .path.segments) 1) -}}{{- (regexMatch "^[0-9]+-" $l) | ternary "argocd.argoproj.io/sync-wave" "factory.internal/ignore" -}}'
+        #? '{{- $l := index .path.segments (sub (len .path.segments) 1) -}}{{- (regexMatch "^[0-9]+-" $l) | ternary "argocd.argoproj.io/sync-wave" "factory.internal/ignore" -}}'
+        ? '{{- $l := index .path.segments (sub (len .path.segments) 1) -}}{{- $p := index .path.segments (sub (len .path.segments) 2) -}}{{- $wl := $l | regexFind "^[0-9]+" -}}{{- $wp := $p | regexFind "^[0-9]+" -}}{{- $w := ternary $wl $wp (ne $wl "") -}}{{- (ne $w "") | ternary "argocd.argoproj.io/sync-wave" "factory.internal/ignore" -}}'
         
         # VALUE: Extracts the wave number from the current directory
         # Defining $l locally for the value scope.
-        : '{{- $l := index .path.segments (sub (len .path.segments) 1) -}}{{- $l | regexFind "^[0-9]+" | default "none" -}}'
+        #: '{{- $l := index .path.segments (sub (len .path.segments) 1) -}}{{- $l | regexFind "^[0-9]+" | default "none" -}}'
+        : '{{- $l := index .path.segments (sub (len .path.segments) 1) -}}{{- $p := index .path.segments (sub (len .path.segments) 2) -}}{{- $wl := $l | regexFind "^[0-9]+" -}}{{- $wp := $p | regexFind "^[0-9]+" -}}{{- $w := ternary $wl $wp (ne $wl "") -}}{{- $w | default "none" -}}'
         
     spec:
       project: default
