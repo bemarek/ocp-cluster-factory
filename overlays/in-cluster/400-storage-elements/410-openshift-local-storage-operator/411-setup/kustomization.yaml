@@ -5,4 +5,4 @@ resources:
   - ../../../../../base/storage/openshift-local-storage-operator/setup/
 
 components:
-  - ../../../../../base/storage/fundamental-building-blocks/subscription-infra-nodeselector-and-tolerations/
+  - ../../../../../base/fundamental-building-blocks/subscription-infra-nodeselector-and-tolerations/
