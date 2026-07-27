@@ -1,0 +1,11 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: generic-sub
+  namespace: generic-ns
+spec:
+  channel: generic-channel
+  name: generic-name
+  source: generic-source
+  sourceNamespace: openshift-marketplace
+  installPlanApproval: Automatic

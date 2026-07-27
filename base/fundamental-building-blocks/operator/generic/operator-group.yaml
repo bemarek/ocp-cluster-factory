@@ -1,0 +1,8 @@
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: generic-og
+  namespace: generic-ns
+spec:
+  targetNamespaces:
+    - generic-ns

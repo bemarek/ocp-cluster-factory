@@ -1,0 +1,66 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+resources:
+  - namespace.yaml
+  - operator-group.yaml
+  - subscription.yaml
+
+replacements:
+  # Update Namespace name and target namespaces in OperatorGroup and Subscription
+  - source:
+      kind: ConfigMap
+      name: operator-parameters
+      fieldPath: data.namespace
+    targets:
+      - select: { kind: Namespace }
+        fieldPaths: [ metadata.name ]
+      - select: { kind: OperatorGroup }
+        fieldPaths: [ metadata.namespace, spec.targetNamespaces.0 ]
+      - select: { kind: Subscription }
+        fieldPaths: [ metadata.namespace ]
+
+  # Update name in Subscription
+  - source:
+      kind: ConfigMap
+      name: operator-parameters
+      fieldPath: data.SubscriptionName
+    targets:
+      - select: { kind: Subscription }
+        fieldPaths: [ metadata.name, spec.name ]
+
+# Update name in OperatorGroup
+  - source:
+      kind: ConfigMap
+      name: operator-parameters
+      fieldPath: data.OperatorGroupName
+    targets:
+      - select: { kind: OperatorGroup }
+        fieldPaths: [ metadata.name ]
+
+  # Update channel in Subscription  
+  - source:
+      kind: ConfigMap
+      name: operator-parameters
+      fieldPath: data.channel
+    targets:
+      - select: { kind: Subscription }
+        fieldPaths: [ spec.channel ]
+
+  # Update source in Subscription  
+  - source:
+      kind: ConfigMap
+      name: operator-parameters
+      fieldPath: data.source
+    targets:
+      - select: { kind: Subscription }
+        fieldPaths: [ spec.source ]
+
+  # Update installPlanApproval in Subscription  
+  - source:
+      kind: ConfigMap
+      name: operator-parameters
+      fieldPath: data.installPlanApproval
+    targets:
+      - select: { kind: Subscription }
+        fieldPaths: [ spec.installPlanApproval ]
