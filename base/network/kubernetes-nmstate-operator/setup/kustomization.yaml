@@ -3,7 +3,6 @@ kind: Kustomization
 
 components:
   - ../../../fundamental-building-blocks/operator/generic
-  - ../../../fundamental-building-blocks/operator/infra-nodeselector-and-tolerations
 
 configMapGenerator:
   - name: operator-parameters
