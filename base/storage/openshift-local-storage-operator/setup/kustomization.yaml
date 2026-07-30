@@ -13,8 +13,8 @@ configMapGenerator:
         config.kubernetes.io/local-config: "true"
     literals:
       - namespace=openshift-local-storage
-      - SubscriptionName=openshift-local-storage-operator
-      - OperatorGroupName=openshift-local-storage-operator
+      - SubscriptionName=local-storage-operator
+      - OperatorGroupName=local-storage-operator
       - channel=stable
       - source=redhat-operators
       - installPlanApproval=Automatic
