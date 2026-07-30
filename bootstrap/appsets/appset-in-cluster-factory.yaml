@@ -11,6 +11,8 @@ spec:
         revision: HEAD
         files:
           - path: 'overlays/in-cluster/**/kustomization.yaml'
+          # Exclude kustomization.yaml files in the 000-parameters directory to avoid applying parameter-only components directly.
+          - path: '!overlays/in-cluster/000-parameters/**/kustomization.yaml'
   template:
     metadata:
       # NAME: Dynamic naming skipping the first root segment
