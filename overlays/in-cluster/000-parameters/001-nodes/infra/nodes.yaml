@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Node
+metadata:
+  name: ocp-hub-worker-0.openshift.local
+---
+apiVersion: v1
+kind: Node
+metadata:
+  name: ocp-hub-worker-1.openshift.local
+---
+apiVersion: v1
+kind: Node
+metadata:
+  name: ocp-hub-worker-2.openshift.local
+---
