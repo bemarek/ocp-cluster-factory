@@ -5,6 +5,8 @@ metadata:
   namespace: openshift-gitops
 spec:
   goTemplate: true
+  syncPolicy:
+    preserveResourcesOnDeletion: true
   generators:
     - git:
         repoURL: https://github.com/bemarek/ocp-cluster-factory.git
