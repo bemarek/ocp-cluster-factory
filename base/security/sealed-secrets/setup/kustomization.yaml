@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# References the compiled release manifest directly from the official repository
+resources:
+  - namespace.yaml
+  - https://github.com/bitnami/sealed-secrets/releases/download/v0.38.4/controller.yaml
+
+# Sets the naming prefix for generated key pair secrets
+patches:
+  - target:
+      kind: Deployment
+      name: sealed-secrets-controller
+    patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: sealed-secrets-controller
+      spec:
+        template:
+          spec:
+            containers:
+              - name: sealed-secrets-controller
+                command:
+                  - controller
+                  - --key-prefix=sealed-secrets-key
