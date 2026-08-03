@@ -19,8 +19,14 @@ patches:
       spec:
         template:
           spec:
+            securityContext:
+              # Clears hardcoded fsGroup to allow OpenShift to assign a dynamic GID
+              fsGroup: null
             containers:
               - name: sealed-secrets-controller
                 command:
                   - controller
                   - --key-prefix=sealed-secrets-key
+                securityContext:
+                  # Clears hardcoded runAsUser to allow OpenShift to assign a dynamic UID
+                  runAsUser: null
