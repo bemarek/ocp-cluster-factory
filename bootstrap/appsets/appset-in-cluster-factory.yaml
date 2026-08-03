@@ -46,5 +46,5 @@ spec:
         namespace: openshift-gitops
       syncPolicy:
         automated:
-          prune: falses
+          prune: false
           selfHeal: true
