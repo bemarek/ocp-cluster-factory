@@ -26,12 +26,21 @@ patches:
                   - controller
                   - --key-prefix=sealed-secrets-key
 
-  # 2. JSON6902 Patch: Aggressively removes hardcoded UIDs/GIDs to satisfy OpenShift SCC
+# 2. JSON6902 Patch: Replaces securityContext blocks to comply with OpenShift SCC
   - target:
       kind: Deployment
       name: sealed-secrets-controller
     patch: |-
-      - op: remove
-        path: /spec/template/spec/securityContext/fsGroup
-      - op: remove
-        path: /spec/template/spec/containers/0/securityContext/runAsUser
+      - op: replace
+        path: /spec/template/spec/securityContext
+        value:
+          runAsNonRoot: true
+      - op: replace
+        path: /spec/template/spec/containers/0/securityContext
+        value:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          capabilities:
+            drop:
+              - ALL
