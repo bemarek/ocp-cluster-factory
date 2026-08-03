@@ -81,7 +81,7 @@ spec:
       
       labels:
         # Dynamically inherits the name of this ApplicationSet ('in-cluster-factory')
-        app.kubernetes.io/managed-by: '{{ .appSet.name }}'
+        app.kubernetes.io/managed-by: '{{ .appSet.metadata.name }}'
         
 # DYNAMIC STAGE EXTRACTION:
         # $l = last segment (target directory)
