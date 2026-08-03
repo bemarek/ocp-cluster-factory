@@ -80,8 +80,7 @@ spec:
       name: '{{ slice .path.segments 1 | join "-" }}'
       
       labels:
-        # Dynamically inherits the name of this ApplicationSet ('in-cluster-factory')
-        app.kubernetes.io/managed-by: '{{ .appSet.metadata.name }}'
+        app.kubernetes.io/managed-by: 'in-cluster-factory'
         
 # DYNAMIC STAGE EXTRACTION:
         # $l = last segment (target directory)
