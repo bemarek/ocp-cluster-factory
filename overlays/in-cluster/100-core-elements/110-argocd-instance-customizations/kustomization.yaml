@@ -6,6 +6,7 @@ resources:
 
 components:
   - ../../../../base/argocd-instance-customizations/components/essential-tunings
+  - ../../../../base/argocd-instance-customizations/components/enable-progressive-sync
   - ../../../../base/argocd-instance-customizations/components/health-checks/subscription
   - ../../../../base/argocd-instance-customizations/components/health-checks/cluster-service-version
   - ../../../../base/argocd-instance-customizations/components/health-checks/local-volume-set
