@@ -62,11 +62,6 @@ spec:
               operator: In
               values: ["712"]
 
-        - matchExpressions:
-            - key: factory.stage
-              operator: NotIn
-              values: [""]
-
   generators:
     - git:
         repoURL: https://github.com/bemarek/ocp-cluster-factory.git
