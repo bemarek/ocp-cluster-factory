@@ -12,7 +12,3 @@ Initialization of Cluster Factory ArgoCD Application (cluster-factory-root), whi
 oc apply -k init/
 ```
 
-
-
-
-
